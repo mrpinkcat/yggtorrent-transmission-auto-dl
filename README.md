@@ -27,6 +27,8 @@ Create an acount on PushOver, and get your `token` and `user_key`.
 
 Copy the `.env.example` file to `.env` and fill in the values.
 
+Finnaly create a `torrents` folder in the root of the project, and make it writable. This is where the downloaded torrents will be stored.
+
 ## Usage
 
 Fill the `wordsToMatch` variable with the words you want to search for.
@@ -34,5 +36,3 @@ Fill the `wordsToMatch` variable with the words you want to search for.
 Example : if `wordsToMatch=["game", "of", "thrones"]` then the app will download torrents found on the RSS feed that contain "game", "of" AND "thrones".
 
 Launch the app using `yarn start`
-
-
