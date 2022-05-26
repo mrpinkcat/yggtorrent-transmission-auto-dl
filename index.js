@@ -52,8 +52,8 @@ const getFeed = async () => {
             downloadTorrent(torrentUrl, '/media/hdd/Series', title.replace(/[^a-zA-Z0-9.\- ]/g, ""), link);
             addNotificationToDataFile(torrentUrl);
           }
+          console.log(`${wordArray} 🔥\n${new Date()}\n`);
         }
-        console.log(`${wordArray} 🔥\n${new Date()}\n`);
       });
     });
   } catch (error) {
