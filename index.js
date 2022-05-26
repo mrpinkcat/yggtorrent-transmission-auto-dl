@@ -19,47 +19,63 @@ const transmission = new Transmission(
   }
 );
 
-const rssUrl = process.env.RSS_URL;
+const rssUrls = {
+  tvSerie: process.env.RSS_SERIES_URL,
+  documentary: process.env.RSS_DOCUMENTARY_URL
+};
 const pushoverCreds = {
   token: process.env.PUSHOVER_TOKEN,
   user: process.env.PUSHOVER_USER,
 }
 
-const allWordsToMatch = [
-  [
-    'le',
-    'flambeau',
-  ],
-  [
-    'look',
-    'at',
-    'me',
-  ]
+/**
+ * Contain all the media to track and witch RSS feed to use
+ * @type {{ wordsToMatch: String[], type: 'tvSerie'|'documentary' }[]}
+ */
+const trackedMedias = [
+  {
+    wordsToMatch: ['le', 'flambeau'],
+    type: 'tvSerie',
+    downloadPath: '/media/hdd/Series',
+  },
+  {
+    wordsToMatch: ['look', 'at', 'me'],
+    type: 'documentary',
+    downloadPath: '/media/hdd/Docu (films)',
+  },
 ];
+
 const dataFileName = './data.json';
 
 const getFeed = async () => {
-  try {
-    const feed = await parser.parseURL(rssUrl);
-    feed.items.forEach(item => {
-      const { title } = item;
-      const link = item.link.trim();
-      const torrentUrl = item.enclosure.url;
+  // Get only the nessesary rss feed in function of the tracked media type
+  const rssFeedsNames = [...new Set(trackedMedias.map(media => media.type))];
+  const rssFeedsUrls = rssFeedsNames.map(rssFeedName => rssUrls[rssFeedName]);
 
-      allWordsToMatch.forEach((wordArray) => {
-        if (stringContainsAllWords(title, wordArray)) {
-          if (!isNotificationAlreadySent(torrentUrl)) {
-            downloadTorrent(torrentUrl, '/media/hdd/Series', title.replace(/[^a-zA-Z0-9.\- ]/g, ""), link);
-            addNotificationToDataFile(torrentUrl);
+  rssFeedsNames.forEach((rssFeedName) => {
+    try {
+      const feed = await parser.parseURL(rssFeedsUrls[rssFeedsNames.indexOf(rssFeedName)]);
+      const concernedMedias = trackedMedias.filter(media => media.type === rssFeedName);
+      feed.items.forEach((item) => {
+        const { title } = item;
+        const link = item.link.trim();
+        const torrentUrl = item.enclosure.url;
+
+        concernedMedias.forEach((concernedMedia) => {
+          if (stringContainsAllWords(item.title, concernedMedia.wordsToMatch)) {
+            if (!isNotificationAlreadySent(item.link)) {
+              console.log(`${concernedMedia.wordsToMatch} found in ${concernedMedia.type}`);
+              downloadTorrent(torrentUrl, concernedMedia.downloadPath, title.replace(/[^a-zA-Z0-9.\- ]/g, ""), link);
+              addNotificationToDataFile(link);
+            }
           }
-          console.log(`${wordArray} 🔥\n${new Date()}\n`);
-        }
+        });
       });
-    });
-  } catch (error) {
-    console.error(error);
-    console.log('ERROR');
-  }
+    } catch (error) {
+      console.error(error);
+      console.log('ERROR');
+    }
+  });
 }
 
 const sendNotification = async (title, message, link) => {
