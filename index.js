@@ -52,7 +52,7 @@ const getFeed = async () => {
   const rssFeedsNames = [...new Set(trackedMedias.map(media => media.type))];
   const rssFeedsUrls = rssFeedsNames.map(rssFeedName => rssUrls[rssFeedName]);
 
-  rssFeedsNames.forEach((rssFeedName) => {
+  rssFeedsNames.forEach(async (rssFeedName) => {
     try {
       const feed = await parser.parseURL(rssFeedsUrls[rssFeedsNames.indexOf(rssFeedName)]);
       const concernedMedias = trackedMedias.filter(media => media.type === rssFeedName);
@@ -62,7 +62,7 @@ const getFeed = async () => {
         const torrentUrl = item.enclosure.url;
 
         concernedMedias.forEach((concernedMedia) => {
-          if (stringContainsAllWords(item.title, concernedMedia.wordsToMatch)) {
+          if (stringContainsAllWords(item.title, concernedMedia.wordsToMatch) && !isNotificationAlreadySent(link)) {
             if (!isNotificationAlreadySent(item.link)) {
               console.log(`${concernedMedia.wordsToMatch} found in ${concernedMedia.type}`);
               downloadTorrent(torrentUrl, concernedMedia.downloadPath, title.replace(/[^a-zA-Z0-9.\- ]/g, ""), link);
