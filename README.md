@@ -31,8 +31,27 @@ Finnaly create a `torrents` folder in the root of the project, and make it writa
 
 ## Usage
 
-Fill the `wordsToMatch` variable with the words you want to search for.
+Fill the `trackedMedias` variable with the media you want to search for. Example:
+  
+  ```js
+  trackedMedias = [
+    {
+      wordsToMatch: ['game', 'of', 'thrones'],
+      type: 'tvSerie',
+      downloadPath: '/media/hdd/Series',
+    },
+    {
+      wordsToMatch: ['look', 'at', 'me'],
+      type: 'documentary',
+      downloadPath: '/media/hdd/Docu (films)',
+    }
+  ]
+  ```
 
-Example : if `wordsToMatch=["game", "of", "thrones"]` then the app will download torrents found on the RSS feed that contain "game", "of" AND "thrones".
+`wordsToMatch` is an array of words that the torrent name must contain.
+
+`type` is the type of media you want to search for. It can be `tvSerie` or `documentary`. This will determine witch RSS feed will be used.
+
+`downloadPath` is the path where the torrent will be downloaded. Ensure that the folder exists and is writable by the user.
 
 Launch the app using `yarn start`
