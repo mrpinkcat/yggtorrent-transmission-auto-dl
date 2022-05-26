@@ -25,8 +25,17 @@ const pushoverCreds = {
   user: process.env.PUSHOVER_USER,
 }
 
-// const wordsToMatch = ['flambeau'];
-const wordsToMatch = ['Equalizer'];
+const allWordsToMatch = [
+  [
+    'le',
+    'flambeau',
+  ],
+  [
+    'look',
+    'at',
+    'me',
+  ]
+];
 const dataFileName = './data.json';
 
 const getFeed = async () => {
@@ -37,17 +46,15 @@ const getFeed = async () => {
       const link = item.link.trim();
       const torrentUrl = item.enclosure.url;
 
-      if (stringContainsAllWords(title, wordsToMatch) && !isNotificationAlreadySent(link)) {
-        addNotificationToDataFile(link);
-        downloadTorrent(
-          torrentUrl,
-          '/media/hdd/Series',
-          title.replace(/[^a-zA-Z0-9.\- ]/g, ""),
-          link,
-        );
-        console.log(`Le flambeau 🔥\n${new Date()}\n`);
-        console.log(title);
-      }
+      allWordsToMatch.forEach((wordArray) => {
+        if (stringContainsAllWords(title, wordArray)) {
+          if (!isNotificationAlreadySent(torrentUrl)) {
+            downloadTorrent(torrentUrl, '/media/hdd/Series', title.replace(/[^a-zA-Z0-9.\- ]/g, ""), link);
+            addNotificationToDataFile(torrentUrl);
+          }
+        }
+        console.log(`${wordArray} 🔥\n${new Date()}\n`);
+      });
     });
   } catch (error) {
     console.error(error);
